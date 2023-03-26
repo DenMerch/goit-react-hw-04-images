@@ -1,44 +1,37 @@
-import { Component } from "react";
+import { useState } from "react";
 import css from './Searchbar.module.css'
+export const Searchbar = ({ handleSubmit }) => {
+    const [search, setSearch] = useState('');
+    const handleInput = e => {
+        setSearch(e.target.value)
 
-export class Searchbar extends Component {
-    state = {
-        search: '',
     }
-    handleInput = e => {
-        this.setState(
-            { [e.target.name]: e.target.value }
-        )
-    }
-    handBtnSubmit = e => {
+    const handBtnSubmit = e => {
         e.preventDefault()
-        this.props.handleSubmit(this.state)
-        this.reset()
+        handleSubmit(search)
+        reset()
     }
-    reset = () => {
-        this.setState({ search: '' })
+    const reset = () => {
+        setSearch('')
     }
+    return (
+        <header className={css.Searchbar}>
+            <form className={css.SearchForm} onSubmit={handBtnSubmit}>
+                <button type="submit" className={css.SearchFormButton} onClick={handBtnSubmit}>
+                    <span className={css.SearchFormButtonLabel}>Search</span>
+                </button>
 
-    render() {
-        return (
-            <header className={css.Searchbar}>
-                <form className={css.SearchForm} onSubmit={this.handBtnSubmit}>
-                    <button type="submit" className={css.SearchFormButton} onClick={this.handBtnSubmit}>
-                        <span className={css.SearchFormButtonLabel}>Search</span>
-                    </button>
-
-                    <input
-                        value={this.state.search}
-                        className={css.SearchFormInput}
-                        type="text"
-                        name="search"
-                        autoComplete="off"
-                        autoFocus
-                        onChange={this.handleInput}
-                        placeholder="Search images and photos"
-                    />
-                </form>
-            </header>
-        )
-    }
+                <input
+                    value={search}
+                    className={css.SearchFormInput}
+                    type="text"
+                    name="search"
+                    autoComplete="off"
+                    autoFocus
+                    onChange={handleInput}
+                    placeholder="Search images and photos"
+                />
+            </form>
+        </header>
+    )
 }

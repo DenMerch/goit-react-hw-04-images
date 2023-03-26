@@ -1,39 +1,36 @@
 import css from './Modal.module.css'
-import { Component } from 'react'
+import { useEffect } from 'react'
 import PropTypes from 'prop-types';
-export class Modal extends Component {
-  state = {}
+export const Modal = ({ url, closeModal }) => {
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.handlePressESC)
-
+  useEffect(() => {
+    window.addEventListener('keydown', handlePressESC)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    return window.removeEventListener('keydown', handlePressESC)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const handleClick = e => {
+    if (e.target.nodeName === 'DIV') closeModal()
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handlePressESC)
+  const handlePressESC = (e) => {
 
+    if (e.code === 'Escape') closeModal()
   }
-  handleClick = e => {
-    if (e.target.nodeName === 'DIV') this.props.closeModal()
-  }
-  handlePressESC = (e) => {
-
-    if (e.code === 'Escape') this.props.closeModal()
-  }
-
-  render() {
-    const { url } = this.props
-    return (
-      <div data-set='overlay' className={css.Overlay} onClick={this.handleClick}>
-        <div className={css.Modal}>
-          <img src={url} alt="" />
-        </div>
+  return (
+    <div data-set='overlay' className={css.Overlay} onClick={handleClick}>
+      <div className={css.Modal}>
+        <img src={url} alt="" />
       </div>
-    )
-  }
+    </div>
+  )
+
 }
 Modal.propTypes = {
-  url: PropTypes.string
+  url: PropTypes.string,
+  closeModal: PropTypes.func
 }
 
 

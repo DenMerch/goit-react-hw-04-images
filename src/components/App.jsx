@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useEffect, useState } from "react";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { fetchData } from './Utils/FetchData'
 import { Searchbar } from "./Searchbar/Searchbar";
@@ -6,74 +6,67 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { Loader } from "./Loader/Loader";
 import { Button } from "components/Button/Button";
 import { Modal } from "components/Modal/Modal";
-const INITIAL_STATE = {
-  gallery: [],
-  error: '',
-  isLoading: false,
-  page: 1,
-  isModal: false,
-  imgURL: '',
-  search: '',
-  showBTN: '',
-}
-export class App extends Component {
-  state = {
-    ...INITIAL_STATE
-  }
-  componentDidUpdate(_, prevState) {
-    if (prevState.search !== this.state.search || prevState.page !== this.state.page) {
-      this.setState({ isLoading: true })
-      fetchData(this.state.search, this.state.page).then((data => {
-        let totalHits = data.data.totalHits;
-        if (totalHits !== 0) {
-          const hits = data.data.hits;
-          this.setState((prevState) => ({
-            gallery: [...prevState.gallery, ...hits],
-            showBTN: this.state.page < Math.ceil(totalHits / 12)
-          }))
-        }
-        else return Promise.reject(`We can't find foto ${this.state.search}`)
-      }))
-        .catch((error) => { Notify.failure(error) })
-        .finally(() => {
-          this.setState({ isLoading: false })
-        })
-    }
-  }
-  handleSubmit = ({ search }) => {
-    if (search !== this.state.search) {
-      this.setState({ search, page: 1, gallery: [], showBTN: false })
+export const App = () => {
+  const [gallery, setGallery] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [isModal, setIsModal] = useState(false);
+  const [imgURL, setImgURL] = useState('');
+  const [search, setSearch] = useState('');
+  const [showBTN, setShowBTN] = useState('')
+  useEffect(() => {
+    if (!search) return
+    setIsLoading(true)
+    fetchData(search, page).then((data => {
+      let totalHits = data.data.totalHits;
+      if (totalHits !== 0) {
+        const hits = data.data.hits;
+        setGallery((prevState) => (
+          [...prevState, ...hits]
+        ))
+        setShowBTN(page < Math.ceil(totalHits / 12))
+      }
+      else return Promise.reject(`We can't find foto ${search}`)
+    }))
+      .catch((error) => { Notify.failure(error) })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }, [page, search])
+  const handleSubmit = (handleSearch) => {
+    if (handleSearch !== search) {
+      setSearch(handleSearch);
+      setPage(1);
+      setGallery([]);
+      setShowBTN(false);
     }
     return
   };
-  handleImgClick = (e) => {
-    this.setState({ isModal: !this.state.isModal, imgURL: e.target.dataset.set })
+  const handleImgClick = (e) => {
+    setIsModal(!isModal)
+    setImgURL(e.target.dataset.set)
   }
-  handleBtnClick = () => {
-
-    this.setState({ page: this.state.page + 1 })
+  const handleBtnClick = () => {
+    setPage(page + 1);
   };
-  handleCloseModal = () => {
-    this.setState({ isModal: !this.state.isModal })
-  }
-  render() {
-    const { gallery, isLoading, isModal } = this.state
-    return (
-      <div
-        style={{
-          display: 'flex',
-          gridGap: 16,
-          paddingBottom: 24,
-          flexDirection: 'column',
-        }}
-      >
-        <Searchbar handleSubmit={this.handleSubmit} />
-        <ImageGallery galleryImg={gallery} imgClick={this.handleImgClick} />
-        {isLoading && <Loader />}
-        {this.state.showBTN && <Button btnClick={this.handleBtnClick} />}
-        {isModal && <Modal url={this.state.imgURL} closeModal={this.handleCloseModal} />}
-      </div >
-    );
-  }
+  const handleCloseModal = () => {
+    setIsModal(!isModal);
 
-};
+  }
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gridGap: 16,
+        paddingBottom: 24,
+        flexDirection: 'column',
+      }}
+    >
+      <Searchbar handleSubmit={handleSubmit} />
+      <ImageGallery galleryImg={gallery} imgClick={handleImgClick} />
+      {isLoading && <Loader />}
+      {showBTN && <Button btnClick={handleBtnClick} />}
+      {isModal && <Modal url={imgURL} closeModal={handleCloseModal} />}
+    </div >
+  )
+}
