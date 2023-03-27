@@ -4,21 +4,21 @@ import PropTypes from 'prop-types';
 export const Modal = ({ url, closeModal }) => {
 
   useEffect(() => {
+    const handlePressESC = (e) => {
+
+      if (e.code === 'Escape') closeModal()
+    }
     window.addEventListener('keydown', handlePressESC)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-  useEffect(() => {
-    return window.removeEventListener('keydown', handlePressESC)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    return () => {
+      window.removeEventListener('keydown', handlePressESC)
+    }
+  }, [closeModal])
+
   const handleClick = e => {
     if (e.target.nodeName === 'DIV') closeModal()
   }
 
-  const handlePressESC = (e) => {
 
-    if (e.code === 'Escape') closeModal()
-  }
   return (
     <div data-set='overlay' className={css.Overlay} onClick={handleClick}>
       <div className={css.Modal}>
